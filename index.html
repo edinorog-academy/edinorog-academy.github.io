@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1D1536">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Академия Единорога</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=Unbounded:wght@600;800&display=swap">
+<style>
+/* Layout: one phone-width column. Home = mascot + daily quest + brain map + games + badges; play = arena with its own header. Single "magic night" look by choice. */
+:root{
+  --night:#1D1536; --deep:#140E28; --card:#2B2150; --card2:#3A2D6B; --line:#4A3B80;
+  --ink:#FFF6EC; --muted:#B8ADD9;
+  --fox:#FF7A1A; --horn:#FF5FA2; --mint:#3DDBB0; --sun:#FFD23F; --lilac:#A98BFF; --sky:#5CC8FF; --bad:#FF5A6A;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--ink);font:500 16px/1.45 var(--body);-webkit-tap-highlight-color:transparent}
+.sky{position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(2px 2px at 8% 12%,var(--ink) 50%,transparent 52%),
+  radial-gradient(1.5px 1.5px at 22% 64%,var(--muted) 50%,transparent 52%),
+  radial-gradient(2px 2px at 41% 30%,var(--sun) 50%,transparent 52%),
+  radial-gradient(1.5px 1.5px at 63% 82%,var(--ink) 50%,transparent 52%),
+  radial-gradient(2px 2px at 86% 22%,var(--horn) 50%,transparent 52%),
+  radial-gradient(1.5px 1.5px at 93% 58%,var(--muted) 50%,transparent 52%),
+  radial-gradient(1.5px 1.5px at 52% 6%,var(--mint) 50%,transparent 52%),
+  radial-gradient(120% 50% at 50% 0%,var(--card) 0%,transparent 70%)}
+.app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+.screen{display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-weight:800}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+
+.top{display:flex;align-items:center;gap:12px}
+.plv{flex:1;min-width:0}
+.plv .t{font-family:var(--display);font-size:15px;font-weight:800}
+.plv .t small{font-family:var(--body);color:var(--sun);font-size:14px;font-weight:800;margin-left:8px}
+.xpbar{height:10px;border-radius:99px;background:var(--deep);overflow:hidden;margin-top:6px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--horn),var(--sun));border-radius:inherit}
+.xpn{font-size:12px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;font-weight:700}
+.streak{display:flex;align-items:center;gap:6px;background:var(--card);border-radius:16px;padding:8px 12px;font-family:var(--display);font-weight:800;font-size:20px;line-height:1}
+.streak svg{width:24px;height:24px}
+.streak small{display:block;font-family:var(--body);font-size:11px;color:var(--muted);font-weight:800;margin-top:2px}
+
+.hero{display:flex;align-items:flex-end;gap:8px}
+.fox{flex:none;overflow:visible}
+.fox.big{width:150px;height:150px;animation:float 4s ease-in-out infinite;-webkit-mask-image:radial-gradient(circle,#000 62%,transparent 72%);mask-image:radial-gradient(circle,#000 62%,transparent 72%)}
+.fox.mid{width:110px;height:110px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px var(--card2),0 0 24px var(--lilac)}
+.fox.happy{animation:hop .8s ease}
+.bubble{flex:1;min-width:0;background:var(--ink);color:var(--deep);border-radius:20px 20px 20px 6px;padding:12px 14px;font-weight:700;font-size:15px;margin-bottom:26px}
+.bubble b{display:block;font-family:var(--display);font-size:12px;color:var(--fox);margin-bottom:2px}
+
+.card{background:var(--card);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.dots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.dot{height:44px;border-radius:12px;background:var(--deep);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted);border:2px dashed var(--line)}
+.dot.done{background:var(--c);color:var(--deep);border:2px solid var(--c)}
+.done-note{margin:0;font-weight:800;color:var(--mint)}
+.btn{background:var(--card2);border-radius:16px;padding:14px 18px;font-weight:800;font-size:16px;box-shadow:0 5px 0 var(--deep);transition:transform .08s}
+.btn.primary{background:var(--fox);color:var(--deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--deep)}
+.wide{width:100%}
+
+.radar{display:block;width:100%;max-width:360px;margin:0 auto}
+.radar .rg{fill:none;stroke:var(--line);stroke-width:1}
+.radar .rp{fill:var(--horn);fill-opacity:.28;stroke:var(--horn);stroke-width:2.5;stroke-linejoin:round}
+.radar text{fill:var(--muted);font:800 12px var(--body)}
+.radar .rv{fill:var(--ink);font-family:var(--display)}
+
+.games{display:flex;flex-direction:column;gap:10px}
+.gcard{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--card);border-radius:20px;padding:12px;text-align:left;width:100%}
+.gicon{width:52px;height:52px;border-radius:16px;background:var(--c);display:grid;place-items:center}
+.gicon svg{width:28px;height:28px;fill:var(--deep);stroke:var(--deep);stroke-width:0}
+.gtxt{display:flex;flex-direction:column;min-width:0}
+.gname{font-family:var(--display);font-size:14px;font-weight:800}
+.gmeta{font-size:13px;color:var(--muted);font-weight:700}
+.lvbar{height:6px;background:var(--deep);border-radius:9px;overflow:hidden;margin-top:6px}
+.lvbar i{display:block;height:100%;background:var(--c);border-radius:inherit}
+.gplay{font-family:var(--display);font-size:12px;font-weight:800;color:var(--c)}
+
+.achs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ach{background:var(--deep);border-radius:14px;padding:10px;display:flex;gap:8px;align-items:center;min-width:0}
+.ach b{display:block;font-size:13px}
+.ach small{display:block;font-size:11px;color:var(--muted);font-weight:700;line-height:1.3}
+.ach.off{opacity:.45}
+.star{width:26px;height:26px;flex:none;fill:var(--sun)}
+.ach.off .star{fill:var(--muted)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:700}
+.ghost{background:var(--card);border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px}
+
+.phead{display:flex;align-items:center;gap:10px}
+.ptitle{flex:1;min-width:0;font-family:var(--display);font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pscore{display:inline-block;font-family:var(--display);font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;color:var(--c)}
+.tbar{height:8px;border-radius:9px;background:var(--deep);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--c);transform-origin:left}
+#area{display:flex;flex-direction:column;gap:16px;-webkit-user-select:none;user-select:none}
+.hint{text-align:center;color:var(--muted);font-weight:800;margin:0}
+.hint b{color:var(--c);font-family:var(--display);font-size:22px}
+.grid{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:8px;width:100%;max-width:420px;margin:0 auto}
+.cell{aspect-ratio:1;border-radius:12px;background:var(--card2);transition:background .15s,opacity .15s}
+.cell:active{transform:scale(.95)}
+.mem .cell.on{background:var(--horn);box-shadow:0 0 18px var(--horn)}
+.mem .cell.hit{background:var(--mint)}
+.mem .cell.miss{background:var(--bad)}
+.mem .cell.reveal{box-shadow:inset 0 0 0 3px var(--horn)}
+.sch .cell{font-family:var(--display);font-weight:800;font-size:clamp(16px,6vw,26px)}
+.sch .cell.got{opacity:.22}
+.sch .cell.no{background:var(--bad)}
+.stroop{background:var(--card);border-radius:24px;padding:22px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px}
+.rule{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:5px 12px;border-radius:99px;background:var(--deep);color:var(--muted)}
+.rule.mean{background:var(--ink);color:var(--deep)}
+.word{font-family:var(--display);font-weight:800;font-size:clamp(26px,9vw,40px);overflow-wrap:anywhere;text-align:center}
+.sws{display:grid;grid-template-columns:repeat(var(--k),minmax(0,1fr));gap:12px}
+.sw{aspect-ratio:1.5;border-radius:18px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.25)}
+.qbox{background:var(--card);border-radius:24px;padding:28px 12px;text-align:center;font-family:var(--display);font-weight:800;font-size:clamp(28px,9vw,40px);font-variant-numeric:tabular-nums}
+.seq{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:clamp(18px,6vw,24px)}
+.seq span{background:var(--deep);border-radius:12px;padding:8px 10px;min-width:44px}
+.seq .q{background:var(--c);color:var(--deep)}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.opt{background:var(--card2);border-radius:18px;padding:18px 8px;font-family:var(--display);font-weight:800;font-size:24px;font-variant-numeric:tabular-nums;box-shadow:0 5px 0 var(--deep)}
+.opt:active{transform:translateY(3px);box-shadow:0 2px 0 var(--deep)}
+
+.panel{background:var(--card);border-radius:24px;padding:20px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.panel p{margin:0;color:var(--muted);font-weight:700;max-width:40ch}
+.panel .det{color:var(--ink)}
+.panel .say{color:var(--ink)}
+.pill{background:var(--c);color:var(--deep);border-radius:99px;padding:4px 12px;font-weight:800;font-size:13px}
+.big{font-family:var(--display);font-weight:800;font-size:48px;line-height:1;color:var(--c);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{background:var(--deep);border-radius:99px;padding:6px 12px;font-weight:800;font-size:14px}
+.chip.hot{background:var(--sun);color:var(--deep)}
+.chip.up{background:var(--mint);color:var(--deep)}
+.news{background:var(--deep);border-radius:14px;padding:10px 14px;font-weight:800;display:flex;gap:8px;align-items:center;text-align:left}
+.news .star{width:20px;height:20px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;width:100%}
+.acts .btn{flex:1 1 140px}
+
+.cre{font-family:var(--body);font-size:20px;font-weight:700;line-height:1.35;padding:22px 16px}
+.cre b{font-family:var(--display);color:var(--c)}
+.idea{display:flex;gap:8px}
+.idea input{flex:1;min-width:0;font:700 17px var(--body);color:var(--ink);background:var(--deep);border:2px solid var(--line);border-radius:14px;padding:12px 14px;-webkit-user-select:text;user-select:text}
+.idea input:focus{outline:none;border-color:var(--c)}
+.idea .btn{padding:0 22px;font-size:24px}
+.ilist{display:flex;flex-wrap:wrap;gap:8px}
+.ilist span{background:var(--card2);border-radius:99px;padding:6px 12px;font-weight:700;font-size:14px}
+@keyframes float{50%{transform:translateY(-6px)}}
+@keyframes hop{30%{transform:translateY(-12px) rotate(-3deg)}60%{transform:none}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{50%{transform:scale(1.3)}}
+#play.no #area{animation:shake .22s}
+#play.ok .pscore{animation:pop .22s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="sky" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="hornG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset=".55" stop-color="#FF5FA2"/><stop offset="1" stop-color="#A98BFF"/></linearGradient></defs></svg>
+<main class="app">
+  <section id="home" class="screen"></section>
+  <section id="play" class="screen" hidden>
+    <div class="phead"><button class="ghost" id="quit">← Выйти</button><div class="ptitle" id="ptitle"></div><div class="pscore" id="pscore"></div></div>
+    <div class="tbar" id="tbar" hidden><i id="tfill"></i></div>
+    <div id="area"></div>
+  </section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s), area=$('#area');
+const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const any=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const plural=(n,a,b,c)=>{const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c};
+
+const ORDER=['mem','att','spd','num','log','cre'];
+const GAMES={
+  mem:{name:'Звёздная карта',skill:'Память',c:'var(--horn)',max:15,xp:s=>s,
+    rules:'Клетки вспыхнут на пару секунд. Запомни их, а когда погаснут, нажми все. Порядок не важен. Ошибся, и раунд окончен. Всего 5 раундов.'},
+  att:{name:'Таблица Шульте',skill:'Внимание',c:'var(--mint)',max:7,xp:s=>Math.round(s/2),
+    rules:'Нажимай числа по порядку как можно быстрее. Смотри в центр таблицы и лови числа боковым зрением. Каждая ошибка добавляет 1,5 секунды.'},
+  spd:{name:'Цветовой обман',skill:'Скорость',c:'var(--sun)',max:8,xp:s=>s,
+    rules:'Нажми кружок того цвета, которым написано слово, а само слово не читай. С 4 уровня иногда будет подсказка «смысл слова»: тогда выбирай цвет, который назван словом. 30 секунд.'},
+  num:{name:'Быстрый счёт',skill:'Счёт',c:'var(--fox)',max:8,xp:s=>s,
+    rules:'Решай примеры в уме и выбирай верный ответ. Ошибки снижают точность. 45 секунд.'},
+  log:{name:'Продолжи ряд',skill:'Логика',c:'var(--lilac)',max:7,xp:s=>s*2,
+    rules:'Найди закономерность в ряду чисел и выбери, какое число будет следующим. 60 секунд.'},
+  cre:{name:'Фабрика идей',skill:'Креативность',c:'var(--sky)',max:8,xp:s=>s*2,
+    rules:'Три раунда по 40 секунд: придумай, как ещё можно использовать предмет, чем похожи разные вещи и что будет в странной ситуации. Пиши коротко, в 2–3 слова, и жми «+». Считается каждая новая идея, но самые ценные — неожиданные.'}
+};
+const ATT=[[3,1],[4,1],[4,-1],[5,1],[5,-1],[6,1],[6,-1]];
+const memK=L=>L+2, memN=k=>k<=4?3:k<=7?4:k<=11?5:6;
+const TITLES=['Жеребёнок','Искорка','Следопыт','Знаток','Мудрец','Звёздный единорог','Хранитель искр','Легенда'];
+const title=l=>TITLES[Math.min(TITLES.length-1,Math.floor((l-1)/2))];
+const plevel=x=>Math.floor(Math.sqrt(x/40))+1;
+const ACH=[
+  ['first','Первый шаг','Сыграть первую игру',s=>s.plays>=1],
+  ['full','Полный круг','Пройти тренировку дня',s=>s.fullDays>=1],
+  ['s3','Три дня подряд','Заниматься 3 дня подряд',s=>s.bestStreak>=3],
+  ['s7','Неделя силы','Заниматься 7 дней подряд',s=>s.bestStreak>=7],
+  ['s30','Железная воля','Заниматься 30 дней подряд',s=>s.bestStreak>=30],
+  ['lv5','Пятёрка','5 уровень в любой игре',s=>ORDER.some(k=>s.games[k].lvl>=5)],
+  ['harm','Гармония','3 уровень во всех играх',s=>ORDER.every(k=>s.games[k].lvl>=3)],
+  ['xp1k','Тысяча искр','Набрать 1000 XP',s=>s.xp>=1000],
+  ['idea','Фонтан идей','Придумать 20 идей за одну игру',s=>s.games.cre.best>=20]
+];
+const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.'];
+const PRAISE=['Вот это скорость мысли!','Мозг сказал спасибо. Сделаю чуть сложнее.','Ты в ударе! Уровень выше.'];
+const STEADY=['Хороший результат. Ещё немного, и уровень поднимется.','Стабильно! Это и есть тренировка.','Неплохо! Попробуешь побить рекорд?'];
+const SOFT=['Я сделал чуть проще. Тренировка работает на краю твоих сил.','Ничего страшного: сложность подстроилась под тебя.'];
+
+const ICON={
+  mem:'<svg viewBox="0 0 28 28"><rect x="3" y="3" width="9" height="9" rx="2"/><rect x="16" y="3" width="9" height="9" rx="2" fill-opacity=".35"/><rect x="3" y="16" width="9" height="9" rx="2" fill-opacity=".35"/><rect x="16" y="16" width="9" height="9" rx="2"/></svg>',
+  att:'<svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10.5" fill="none" stroke-width="3"/><circle cx="14" cy="14" r="4"/></svg>',
+  spd:'<svg viewBox="0 0 28 28"><path d="M17 2 5 16h8l-2 10 12-15h-8z"/></svg>',
+  num:'<svg viewBox="0 0 28 28"><path d="M8 3v11M2.5 8.5h11M16 16l8 8M24 16l-8 8" stroke-width="3" stroke-linecap="round"/></svg>',
+  log:'<svg viewBox="0 0 28 28"><rect x="3" y="16" width="5" height="9" rx="1.5"/><rect x="11.5" y="10" width="5" height="15" rx="1.5"/><rect x="20" y="3" width="5" height="22" rx="1.5" fill-opacity=".35"/></svg>',
+  cre:'<svg viewBox="0 0 28 28"><path d="M14 2.5a8 8 0 0 0-4.6 14.6V20.5h9.2v-3.4A8 8 0 0 0 14 2.5z"/><rect x="10" y="22" width="8" height="3.5" rx="1.5"/></svg>'
+};
+const FLAME='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-4-1-6 1-9z" fill="#FF7A1A"/><path d="M12 13c1.5 1.5 3 2.5 3 4.5a3 3 0 0 1-6 0c0-1.5 1-2.5 3-4.5z" fill="#FFD23F"/></svg>';
+const STAR='<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z"/></svg>';
+const mascot=(mood,size)=>`<img class="fox ${size} ${mood}" src="${size==='big'?'unicorn.webp':'unicorn-head.webp'}" alt="" width="${size==='big'?150:110}" height="${size==='big'?150:110}">`;
+
+/* ---------- state: saved on this phone ---------- */
+const KEY='lisorog-v1';
+const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],updatedAt:0,
+  games:Object.fromEntries(ORDER.map(k=>[k,{lvl:1,best:0,plays:0}]))});
+function norm(x){
+  const d=DEF(); if(!x||typeof x!=='object') return d;
+  const o={...d,...x,today:{...d.today,...(x.today||{})},games:{}};
+  o.today.done=[...(o.today.done||[])]; o.ach=[...(x.ach||[])];
+  for(const k of ORDER) o.games[k]={...d.games[k],...((x.games||{})[k]||{})};
+  return o;
+}
+let S; try{S=norm(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=DEF()}
+if(!S.paced){const cap=Math.max(1,S.streak||0); for(const k of ORDER) S.games[k].lvl=Math.min(S.games[k].lvl,cap); S.paced=true; try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function save(){S.updatedAt=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const dkey=(off=0)=>{const d=new Date();d.setDate(d.getDate()+off);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const streakNow=()=>S.lastDay===dkey()||S.lastDay===dkey(-1)?S.streak:0;
+const todayDone=()=>S.today.date===dkey()?S.today.done:[];
+
+/* ---------- sound & feedback ---------- */
+let AC;
+function beep(good){
+  if(!S.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;
+    o.type='triangle'; o.frequency.setValueAtTime(good?660:200,t); if(good) o.frequency.linearRampToValueAtTime(990,t+.08);
+    g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t+.2);
+  }catch(e){}
+}
+function fx(good){beep(good); const p=$('#play'); p.classList.remove('ok','no'); void p.offsetWidth; p.classList.add(good?'ok':'no')}
+let timers=[],raf=0;
+const later=(f,ms)=>timers.push(setTimeout(f,ms));
+function stopAll(){timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf)}
+
+/* ---------- home ---------- */
+function radar(){
+  const cx=160,cy=108,R=72,pt=(i,v)=>{const a=(-90+i*360/ORDER.length)*Math.PI/180;return [cx+R*v*Math.cos(a),cy+R*v*Math.sin(a)]};
+  const P=a=>a.map(n=>n.toFixed(1)).join(',');
+  const vals=ORDER.map(k=>Math.max(.06,S.games[k].lvl/GAMES[k].max));
+  let s=`<svg class="radar" viewBox="0 0 320 206" role="img" aria-label="Уровни навыков">`;
+  for(const v of [.25,.5,.75,1]) s+=`<polygon class="rg" points="${ORDER.map((_,i)=>P(pt(i,v))).join(' ')}"/>`;
+  ORDER.forEach((_,i)=>{const[x,y]=pt(i,1);s+=`<line class="rg" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`});
+  s+=`<polygon class="rp" points="${vals.map((v,i)=>P(pt(i,v))).join(' ')}"/>`;
+  vals.forEach((v,i)=>{const[x,y]=pt(i,v);s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" style="fill:${GAMES[ORDER[i]].c}"/>`});
+  ORDER.forEach((k,i)=>{const[x,y]=pt(i,1.2),a=Math.abs(x-cx)<5?'middle':x>cx?'start':'end';
+    s+=`<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="${a}">${GAMES[k].skill} <tspan class="rv">${S.games[k].lvl}</tspan></text>`});
+  return s+'</svg>';
+}
+function renderHome(){
+  const pl=plevel(S.xp),lo=40*(pl-1)**2,hi=40*pl**2,st=streakNow(),done=todayDone(),left=ORDER.filter(k=>!done.includes(k));
+  const say=S.plays===0
+    ?'Привет, я Единорог! Каждый день у нас 6 коротких игр для мозга. Жми «Начать тренировку»!'
+    :left.length?`Сегодня осталось ${left.length} ${plural(left.length,'игра','игры','игр')}. ${any(TIPS)}`:`Тренировка дня пройдена! ${any(TIPS)}`;
+  $('#home').innerHTML=`
+  <div class="top">
+    <div class="plv"><div class="t">Уровень ${pl}<small>${title(pl)}</small></div>
+      <div class="xpbar"><i style="width:${((S.xp-lo)/(hi-lo)*100).toFixed(1)}%"></i></div>
+      <div class="xpn">${S.xp} / ${hi} XP до уровня ${pl+1}</div></div>
+    <div class="streak" title="Дней подряд">${FLAME}<div>${st}<small>${plural(st,'день','дня','дней')} подряд</small></div></div>
+  </div>
+  <div class="hero">${mascot(left.length?'':'happy','big')}<div class="bubble"><b>Единорог</b>${say}</div></div>
+  <div class="card">
+    <div class="lbl">Тренировка дня · ${done.length} из ${ORDER.length}</div>
+    <div class="dots">${ORDER.map(k=>`<div class="dot${done.includes(k)?' done':''}" style="--c:${GAMES[k].c}">${GAMES[k].skill}</div>`).join('')}</div>
+    ${left.length?`<button class="btn primary" data-play="${left[0]}">${done.length?'Продолжить':'Начать тренировку'}: ${GAMES[left[0]].name}</button>`
+      :`<p class="done-note">Готово! Бонус +50 XP получен. Завтра будет новая тренировка, а пока можно играть свободно.</p>`}
+  </div>
+  <div class="card"><div class="lbl">Карта мозга</div>${radar()}</div>
+  <div class="games">${ORDER.map(k=>{const G=GAMES[k],g=S.games[k];return `<button class="gcard" data-play="${k}" style="--c:${G.c}">
+    <span class="gicon">${ICON[k]}</span>
+    <span class="gtxt"><span class="gname">${G.name}</span><span class="gmeta">${G.skill} · уровень ${g.lvl} из ${G.max}${g.best?` · рекорд ${g.best}`:''}</span><span class="lvbar"><i style="width:${(g.lvl/G.max*100).toFixed(1)}%"></i></span></span>
+    <span class="gplay">Играть</span></button>`}).join('')}</div>
+  <div class="card"><div class="lbl">Достижения · ${S.ach.length} из ${ACH.length}</div>
+    <div class="achs">${ACH.map(a=>`<div class="ach${S.ach.includes(a[0])?'':' off'}">${STAR}<div><b>${a[1]}</b><small>${a[2]}</small></div></div>`).join('')}</div></div>
+  <div class="foot"><span>Прогресс сохраняется на этом телефоне</span><button class="ghost" id="snd">Звук: ${S.sound?'вкл':'выкл'}</button></div>`;
+}
+function goHome(){stopAll(); $('#play').hidden=true; $('#home').hidden=false; renderHome(); scrollTo(0,0)}
+
+/* ---------- game shell ---------- */
+function detail(id,L){
+  if(id==='mem'){const k=memK(L),n=memN(k);return `На этом уровне: ${k} клеток на поле ${n}×${n}.`}
+  if(id==='att'){const[n,d]=ATT[L-1];return `На этом уровне: таблица ${n}×${n}, ${d>0?'от 1 до '+n*n:'от '+n*n+' до 1'}.`}
+  if(id==='cre'){const t=6+2*L;return `Цель уровня: ${t} ${plural(t,'идея','идеи','идей')} за 3 раунда. Темы: ${['простые','посложнее','абстрактные'][L<=3?0:L<=6?1:2]}.`}
+  return '';
+}
+function intro(id){
+  stopAll(); const G=GAMES[id],L=S.games[id].lvl;
+  $('#home').hidden=true; $('#play').hidden=false; $('#play').style.setProperty('--c',G.c);
+  $('#ptitle').textContent=G.name; $('#pscore').textContent=''; $('#tbar').hidden=true;
+  area.innerHTML=`<div class="panel">${mascot('','mid')}<span class="pill">${G.skill} · уровень ${L}</span><h2>${G.name}</h2><p>${G.rules}</p>${detail(id,L)?`<p class="det">${detail(id,L)}</p>`:''}<button class="btn primary wide" id="go">Начать</button></div>`;
+  $('#go').onclick=()=>START[id]();
+  scrollTo(0,0);
+}
+function finish(id,score,newLvl,big,sub){
+  stopAll(); $('#tbar').hidden=true;
+  const G=GAMES[id],g=S.games[id],old=g.lvl,prevBest=g.best,t=dkey();
+  newLvl=Math.min(G.max,Math.max(1,newLvl));
+  let capped=false;
+  if(newLvl>old){if(g.upDay===t){newLvl=old;capped=true}else{newLvl=old+1;g.upDay=t}}
+  else if(newLvl<old) newLvl=old-1;
+  g.lvl=newLvl; g.best=Math.max(prevBest,score); g.plays++; S.plays++;
+  if(S.lastDay!==t){S.streak=S.lastDay===dkey(-1)?S.streak+1:1; S.lastDay=t; S.bestStreak=Math.max(S.bestStreak,S.streak)}
+  if(S.today.date!==t) S.today={date:t,done:[],bonus:false};
+  if(!S.today.done.includes(id)) S.today.done.push(id);
+  let xp=10+G.xp(score)+3*newLvl+(newLvl>old?15:0),daily=false;
+  if(S.today.done.length===ORDER.length&&!S.today.bonus){S.today.bonus=true;S.fullDays++;xp+=50;daily=true}
+  const pl0=plevel(S.xp); S.xp+=xp; const pl1=plevel(S.xp);
+  const fresh=ACH.filter(a=>!S.ach.includes(a[0])&&a[3](S)); fresh.forEach(a=>S.ach.push(a[0]));
+  save();
+  const up=newLvl>old,down=newLvl<old,rec=g.plays>1&&score>prevBest;
+  const nxt=ORDER.find(k=>!S.today.done.includes(k));
+  $('#pscore').textContent='';
+  area.innerHTML=`<div class="panel">${mascot(down?'':'happy','mid')}
+    <div class="big">${big}</div><p>${sub}</p>
+    <div class="chips"><span class="chip hot">+${xp} XP</span><span class="chip${up?' up':''}">${up||down?`Уровень ${old} → ${newLvl}`:`Уровень ${newLvl}`}</span>${rec?'<span class="chip hot">Новый рекорд</span>':''}</div>
+    ${pl1>pl0?`<div class="news">${STAR}Уровень игрока ${pl1}: ${title(pl1)}</div>`:''}
+    ${daily?`<div class="news">${STAR}Тренировка дня пройдена: +50 XP</div>`:''}
+    ${fresh.map(a=>`<div class="news">${STAR}Достижение «${a[1]}»</div>`).join('')}
+    <p class="say">${capped?'Отличный результат! Сегодня уровень уже вырос, следующая ступень откроется завтра.':any(up?PRAISE:down?SOFT:STEADY)}</p>
+    <div class="acts"><button class="btn" id="again">Ещё раз</button>${nxt?`<button class="btn primary" data-play="${nxt}">Дальше: ${GAMES[nxt].name}</button>`:'<button class="btn primary" id="tohome">На главную</button>'}</div></div>`;
+  $('#again').onclick=()=>intro(id);
+  const th=$('#tohome'); if(th) th.onclick=goHome;
+}
+
+/* ---------- memory: star map ---------- */
+function playMem(){
+  let cur=S.games.mem.lvl,round=0,found=0,perfect=0; const ROUNDS=5;
+  (function trial(){
+    if(round>=ROUNDS) return finish('mem',found,cur+(perfect>=4?1:perfect<=1?-1:0),String(found),`${plural(found,'клетка найдена','клетки найдено','клеток найдено')} · без ошибок ${perfect} из ${ROUNDS} раундов`);
+    round++; $('#pscore').textContent=`${round}/${ROUNDS}`;
+    const k=memK(cur),n=memN(k),lit=new Set(shuffle([...Array(n*n).keys()]).slice(0,k));
+    area.innerHTML=`<p class="hint" id="mh">Запомни <b>${k}</b> ${plural(k,'клетку','клетки','клеток')}</p><div class="grid mem" style="--n:${n}">${Array.from({length:n*n},(_,i)=>`<button class="cell${lit.has(i)?' on':''}" data-i="${i}" disabled aria-label="Клетка ${i+1}"></button>`).join('')}</div>`;
+    const cells=[...area.querySelectorAll('.cell')];
+    later(()=>{
+      cells.forEach(b=>{b.classList.remove('on');b.disabled=false});
+      $('#mh').innerHTML='Нажми все клетки, которые светились';
+      let hit=0,over=false;
+      cells.forEach(b=>b.onclick=()=>{
+        if(over||b.classList.contains('hit')) return;
+        if(lit.has(+b.dataset.i)){
+          b.classList.add('hit'); hit++; found++; beep(true);
+          if(hit===k){over=true; perfect++; later(trial,650)}
+        }else{
+          over=true; b.classList.add('miss'); fx(false);
+          cells.forEach(x=>{if(lit.has(+x.dataset.i)&&!x.classList.contains('hit')) x.classList.add('reveal')});
+          later(trial,1300);
+        }
+      });
+    },1000+k*350);
+  })();
+}
+
+/* ---------- attention: Schulte table ---------- */
+function playAtt(){
+  const L=S.games.att.lvl,[n,dir]=ATT[L-1],N=n*n,t0=performance.now();
+  let want=dir>0?1:N,miss=0;
+  area.innerHTML=`<p class="hint">Найди: <b id="want">${want}</b></p><div class="grid sch" style="--n:${n}">${shuffle([...Array(N)].map((_,i)=>i+1)).map(v=>`<button class="cell" data-v="${v}">${v}</button>`).join('')}</div>`;
+  (function tick(){$('#pscore').textContent=((performance.now()-t0)/1000).toFixed(1)+' с'; raf=requestAnimationFrame(tick)})();
+  area.querySelectorAll('.cell').forEach(b=>b.onclick=()=>{
+    if(b.classList.contains('got')) return;
+    if(+b.dataset.v!==want){miss++; fx(false); b.classList.add('no'); later(()=>b.classList.remove('no'),250); return}
+    b.classList.add('got'); beep(true); want+=dir;
+    if(want<1||want>N){
+      const t=(performance.now()-t0)/1000+miss*1.5,score=Math.round(N*60/t);
+      finish('att',score,L+(t<=N*1.1?1:t>N*2.4?-1:0),t.toFixed(1)+' с',`${N} чисел · ${plural(miss,'ошибка','ошибки','ошибок').replace(/^/,miss+' ')} · ${score} в минуту`);
+    }else $('#want').textContent=want;
+  });
+}
+
+/* ---------- timed blitz: speed, math, logic ---------- */
+function blitz(id,dur,gen,draw,judge){
+  const L=S.games[id].lvl,t0=performance.now(),fill=$('#tfill'); let ok=0,bad=0,it;
+  $('#tbar').hidden=false; $('#pscore').textContent='0';
+  const pick=v=>{if(!it) return; const good=v===it.ans; good?ok++:bad++; fx(good); $('#pscore').textContent=ok; it=gen(L); draw(it,pick)};
+  (function step(){
+    const left=dur-(performance.now()-t0)/1000;
+    fill.style.transform=`scaleX(${Math.max(0,left/dur)})`;
+    if(left<=0){it=null; const acc=ok/Math.max(1,ok+bad);
+      return finish(id,ok,L+judge(ok,acc,L),String(ok),`${plural(ok,'верный ответ','верных ответа','верных ответов')} · точность ${Math.round(acc*100)}%`)}
+    raf=requestAnimationFrame(step);
+  })();
+  it=gen(L); draw(it,pick);
+}
+function options(ans,spread){
+  const s=new Set([ans]);
+  for(const d of shuffle([1,-1,2,-2,10,-10,spread,-spread,3,-3])){if(s.size>=4)break; const v=ans+d; if(v>=0&&d) s.add(v)}
+  while(s.size<4) s.add(ans+r(4,15));
+  return shuffle([...s]);
+}
+const drawOpts=head=>(it,cb)=>{
+  area.innerHTML=head(it)+`<div class="opts">${it.opts.map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join('')}</div>`;
+  area.querySelectorAll('.opt').forEach(b=>b.onclick=()=>cb(+b.dataset.v));
+};
+
+const COLS=[['красный','#FF4D5E'],['синий','#3F8CFF'],['зелёный','#2FD072'],['жёлтый','#FFD23F'],['белый','#FFFFFF'],['фиолетовый','#B57BFF']];
+function genSpd(L){
+  const m=Math.min(6,3+Math.ceil(L/2)),w=r(0,m-1); let c=r(0,m-1);
+  if(c===w&&Math.random()<.8) c=(w+r(1,m-1))%m;
+  const rule=L>=4&&Math.random()<.4?'mean':'ink';
+  return {m,w,c,rule,ans:rule==='ink'?c:w};
+}
+function drawSpd(it,cb){
+  area.innerHTML=`<div class="stroop"><span class="rule ${it.rule}">${it.rule==='ink'?'цвет букв':'смысл слова'}</span><div class="word" style="color:${COLS[it.c][1]}">${COLS[it.w][0]}</div></div>
+  <div class="sws" style="--k:${it.m===4?2:3}">${COLS.slice(0,it.m).map((x,i)=>`<button class="sw" data-v="${i}" style="background:${x[1]}" aria-label="${x[0]}"></button>`).join('')}</div>`;
+  area.querySelectorAll('.sw').forEach(b=>b.onclick=()=>cb(+b.dataset.v));
+}
+function genNum(L){
+  const t=Math.random()<.55?L:r(1,L); let a,b,c,q,ans,sp=10;
+  const pm=()=>Math.random()<.5?(q=`${a} + ${b}`,ans=a+b):(q=`${a} − ${b}`,ans=a-b);
+  switch(t){
+    case 1: a=r(1,9);b=r(1,9);q=`${a} + ${b}`;ans=a+b;break;
+    case 2: a=r(10,20);b=r(2,9);pm();break;
+    case 3: a=r(30,79);b=r(11,29);pm();break;
+    case 4: a=r(2,9);b=r(2,9);q=`${a} × ${b}`;ans=a*b;sp=a;break;
+    case 5: b=r(2,9);ans=r(2,9);q=`${b*ans} : ${b}`;sp=5;break;
+    case 6: a=r(2,9);b=r(2,9);c=r(2,30);q=`${c} + ${a} × ${b}`;ans=c+a*b;sp=c;break;
+    case 7: a=r(12,29);b=r(3,9);q=`${a} × ${b}`;ans=a*b;sp=b;break;
+    default: a=r(2,9);b=r(3,9);c=r(11,25);q=`(${c} − ${a}) × ${b}`;ans=(c-a)*b;sp=b;
+  }
+  return {q,ans,opts:options(ans,sp)};
+}
+function genLog(L){
+  const t=Math.random()<.55?L:r(1,L); let s,a,b,d,seq=[];
+  switch(t){
+    case 1: s=r(1,10);d=r(2,5);for(let i=0;i<6;i++)seq.push(s+d*i);break;
+    case 2: s=r(50,90);d=r(3,9);for(let i=0;i<6;i++)seq.push(s-d*i);break;
+    case 3: s=r(1,3);d=r(2,3);for(let i=0;i<5;i++)seq.push(s*d**i);break;
+    case 4: s=r(1,10);d=r(1,3);seq=[s];for(let i=1;i<6;i++)seq.push(seq[i-1]+d+i-1);break;
+    case 5: if(Math.random()<.5){s=r(1,6);for(let i=0;i<6;i++)seq.push((s+i)**2)}
+            else{seq=[r(1,4),r(1,5)];for(let i=2;i<7;i++)seq.push(seq[i-1]+seq[i-2])}break;
+    case 6: if(Math.random()<.5){seq=[r(1,4)];for(let i=1;i<6;i++)seq.push(seq[i-1]*2+1)}
+            else{a=r(1,9);b=r(20,30);d=r(2,4);const e=r(2,5);for(let i=0;i<7;i++)seq.push(i%2?b-e*(i-1)/2:a+d*i/2)}break;
+    default: a=r(2,3);b=r(1,5);seq=[r(1,5)];for(let i=1;i<6;i++)seq.push(i%2?seq[i-1]*a:seq[i-1]+b);
+  }
+  const ans=seq.pop();
+  return {seq,ans,opts:options(ans,Math.abs(seq[seq.length-1]-seq[seq.length-2])||5)};
+}
+
+/* ---------- creativity: idea factory (fluency; harder topics and higher targets by level) ---------- */
+const IDEAS=[
+  {q:t=>`Как ещё можно использовать <b>${t}</b>?`,t:[['газету','кирпич','ложку','носок','скрепку','пустую бутылку'],['старый зонт','воздушный шарик','ведро','пустую коробку','расчёску','прищепку'],['тень','эхо','лужу','лишнюю минуту','пустую страницу','забытую мелодию']]},
+  {q:t=>`Чем похожи <b>${t}</b>?`,t:[['яблоко и мяч','кошка и часы','книга и дверь','чайник и вулкан','луна и тарелка'],['облако и подушка','река и дорога','зеркало и озеро','дерево и семья','телефон и окно'],['музыка и лестница','память и сад','время и река','улыбка и солнце','вопрос и ключ']]},
+  {q:t=>`Что будет, если <b>${t}</b>?`,t:[['у людей вырастет хвост','пойдёт дождь из лимонада','собаки научатся говорить','все машины станут розовыми','зима продлится год'],['исчезнет всё электричество','люди перестанут спать','вода станет сладкой','деньги будут расти на деревьях','все начнут говорить только правду'],['время пойдёт назад','у всех вещей пропадут цвета','люди начнут читать мысли','исчезнут все числа','каждый день будет повторяться']]}
+];
+const esc=v=>v.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function playCre(){
+  const L=S.games.cre.lvl,tier=L<=3?0:L<=6?1:2,DUR=40,target=6+2*L; let round=0,total=0;
+  $('#pscore').textContent='0';
+  (function next(){
+    if(round>=IDEAS.length) return finish('cre',total,L+(total>=target?1:total<target/2?-1:0),String(total),`${plural(total,'идея','идеи','идей')} · цель уровня ${target}`);
+    const P=IDEAS[round++],seen=new Set(),t0=performance.now();
+    area.innerHTML=`<p class="hint">Раунд ${round} из ${IDEAS.length}</p><div class="qbox cre">${P.q(any(P.t[tier]))}</div>
+      <form class="idea" id="iform"><input id="iin" autocomplete="off" maxlength="60" placeholder="Твоя идея…" aria-label="Идея"><button class="btn primary" aria-label="Добавить идею">+</button></form><div class="ilist" id="ilist"></div>`;
+    const inp=$('#iin'); inp.focus(); $('#tbar').hidden=false;
+    $('#iform').onsubmit=e=>{
+      e.preventDefault(); const v=inp.value.trim().toLowerCase().replace(/\s+/g,' '); inp.value=''; inp.focus();
+      if(v.length<3||seen.has(v)) return fx(false);
+      seen.add(v); total++; fx(true); $('#pscore').textContent=total;
+      $('#ilist').insertAdjacentHTML('afterbegin',`<span>${esc(v)}</span>`);
+    };
+    (function step(){
+      const left=DUR-(performance.now()-t0)/1000;
+      $('#tfill').style.transform=`scaleX(${Math.max(0,left/DUR)})`;
+      if(left<=0){inp.blur(); return next()}
+      raf=requestAnimationFrame(step);
+    })();
+  })();
+}
+
+const START={
+  mem:playMem, att:playAtt, cre:playCre,
+  spd:()=>blitz('spd',30,genSpd,drawSpd,(ok,acc,L)=>acc>=.85&&ok>=16+L?1:acc<.7||ok<8?-1:0),
+  num:()=>blitz('num',45,genNum,drawOpts(it=>`<div class="qbox">${it.q} = ?</div>`),(ok,acc)=>acc>=.85&&ok>=14?1:acc<.65||ok<6?-1:0),
+  log:()=>blitz('log',60,genLog,drawOpts(it=>`<div class="qbox seq">${it.seq.map(v=>`<span>${v}</span>`).join('')}<span class="q">?</span></div>`),(ok,acc)=>acc>=.8&&ok>=10?1:acc<.55||ok<4?-1:0)
+};
+
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-play]'); if(p) return intro(p.dataset.play);
+  if(e.target.closest('#snd')){S.sound=!S.sound; save(); renderHome()}
+});
+$('#quit').onclick=goHome;
+renderHome();
+</script>
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
+</body>
+</html>
