@@ -150,6 +150,33 @@ h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-wei
 .idea .btn{padding:0 22px;font-size:24px}
 .ilist{display:flex;flex-wrap:wrap;gap:8px}
 .ilist span{background:var(--card2);border-radius:99px;padding:6px 12px;font-weight:700;font-size:14px}
+.tint{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .7s;background:radial-gradient(130% 70% at 50% 0%,var(--pa,transparent),transparent 72%)}
+.panel .scene{color:var(--ink);font-weight:800}
+.find{display:flex;align-items:center;gap:12px;background:var(--deep);border-radius:16px;padding:10px 14px;text-align:left;width:100%}
+.find.newf{box-shadow:0 0 0 2px var(--sun),0 0 22px rgba(255,210,63,.4)}
+.find .fe{font-size:30px;line-height:1}
+.find div{flex:1;min-width:0}
+.find b{display:block}
+.find small{display:block;color:var(--muted);font-weight:700;font-size:12px}
+.jnum{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;color:var(--lilac);font-variant-numeric:tabular-nums}
+.jnote{margin:0;color:var(--muted);font-weight:700;font-size:14px}
+.jg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.jc{background:var(--deep);border-radius:14px;padding:8px 4px;text-align:center;opacity:.45;min-width:0}
+.jc.on{opacity:1}
+.jc span{display:block;font-size:26px;line-height:1.2}
+.jc b{display:block;font-size:11px;line-height:1.2;overflow-wrap:anywhere}
+.jl{display:flex;gap:10px;align-items:center;font-weight:700;font-size:14px}
+.jl span{font-size:22px}
+.nov{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:radial-gradient(circle,rgba(20,14,40,.55),rgba(20,14,40,.93));animation:fadein .25s}
+.rays{position:absolute;left:50%;top:50%;width:200vmax;height:200vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(rgba(255,210,63,.2) 0 10deg,transparent 10deg 20deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 45%);mask-image:radial-gradient(circle,#000 0,transparent 45%);animation:spin 16s linear infinite}
+.nbox{position:relative;background:var(--card);border:3px solid var(--sun);border-radius:28px;padding:24px 18px 16px;text-align:center;max-width:340px;width:100%;display:flex;flex-direction:column;gap:8px;align-items:center;box-shadow:0 0 60px rgba(255,210,63,.45);animation:pop2 .55s cubic-bezier(.2,1.5,.4,1)}
+.nbox h3{margin:0;font-family:var(--display);font-size:20px;color:var(--sun);text-wrap:balance}
+.nbox p{margin:0;font-weight:700}
+.nbox small{color:var(--muted);font-weight:700;font-size:12px;margin-top:4px}
+.ne{font-size:64px;line-height:1;animation:float 2s ease-in-out infinite}
+@keyframes fadein{from{opacity:0}}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes pop2{from{transform:scale(.4);opacity:0}}
 @keyframes float{50%{transform:translateY(-6px)}}
 @keyframes hop{30%{transform:translateY(-12px) rotate(-3deg)}60%{transform:none}}
 @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
@@ -163,6 +190,7 @@ h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-wei
 <body>
 
 <div class="sky" aria-hidden="true"></div>
+<div class="tint" id="tint" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="hornG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD23F"/><stop offset=".55" stop-color="#FF5FA2"/><stop offset="1" stop-color="#A98BFF"/></linearGradient></defs></svg>
 <main class="app">
   <section id="home" class="screen"></section>
@@ -171,6 +199,7 @@ h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-wei
     <div class="tbar" id="tbar" hidden><i id="tfill"></i></div>
     <div id="area"></div>
   </section>
+  <section id="journal" class="screen" hidden></section>
 </main>
 
 <script>
@@ -209,9 +238,11 @@ const ACH=[
   ['lv5','Пятёрка','5 уровень в любой игре',s=>ORDER.some(k=>s.games[k].lvl>=5)],
   ['harm','Гармония','3 уровень во всех играх',s=>ORDER.every(k=>s.games[k].lvl>=3)],
   ['xp1k','Тысяча искр','Набрать 1000 XP',s=>s.xp>=1000],
-  ['idea','Фонтан идей','Придумать 20 идей за одну игру',s=>s.games.cre.best>=20]
+  ['idea','Фонтан идей','Придумать 20 идей за одну игру',s=>s.games.cre.best>=20],
+  ['col10','Коллекционер','Открыть 10 комбинаций',s=>s.disc.length>=10],
+  ['col50','Исследователь','Открыть 50 комбинаций',s=>s.disc.length>=50]
 ];
-const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.'];
+const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.','В каждой тренировке новое место и новый спутник. Собирай комбинации в журнале открытий.'];
 const PRAISE=['Вот это скорость мысли!','Мозг сказал спасибо. Сделаю чуть сложнее.','Ты в ударе! Уровень выше.'];
 const STEADY=['Хороший результат. Ещё немного, и уровень поднимется.','Стабильно! Это и есть тренировка.','Неплохо! Попробуешь побить рекорд?'];
 const SOFT=['Я сделал чуть проще. Тренировка работает на краю твоих сил.','Ничего страшного: сложность подстроилась под тебя.'];
@@ -230,12 +261,12 @@ const mascot=(mood,size)=>`<img class="fox ${size} ${mood}" src="${size==='big'?
 
 /* ---------- state: saved on this phone ---------- */
 const KEY='lisorog-v1';
-const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],updatedAt:0,
+const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],disc:[],updatedAt:0,
   games:Object.fromEntries(ORDER.map(k=>[k,{lvl:1,best:0,plays:0}]))});
 function norm(x){
   const d=DEF(); if(!x||typeof x!=='object') return d;
   const o={...d,...x,today:{...d.today,...(x.today||{})},games:{}};
-  o.today.done=[...(o.today.done||[])]; o.ach=[...(x.ach||[])];
+  o.today.done=[...(o.today.done||[])]; o.ach=[...(x.ach||[])]; o.disc=[...(x.disc||[])];
   for(const k of ORDER) o.games[k]={...d.games[k],...((x.games||{})[k]||{})};
   return o;
 }
@@ -301,11 +332,69 @@ function renderHome(){
     <span class="gicon">${ICON[k]}</span>
     <span class="gtxt"><span class="gname">${G.name}</span><span class="gmeta">${G.skill} · уровень ${g.lvl} из ${G.max}${g.best?` · рекорд ${g.best}`:''}</span><span class="lvbar"><i style="width:${(g.lvl/G.max*100).toFixed(1)}%"></i></span></span>
     <span class="gplay">Играть</span></button>`}).join('')}</div>
+  <button class="gcard" data-journal="1" style="--c:var(--lilac)"><span class="gicon"><svg viewBox="0 0 28 28"><path d="M3 5h10v18H3zM15 5h10v18H15z"/></svg></span><span class="gtxt"><span class="gname">Журнал открытий</span><span class="gmeta">${S.disc.length} из ${TOTAL} комбинаций</span></span><span class="gplay">Открыть</span></button>
   <div class="card"><div class="lbl">Достижения · ${S.ach.length} из ${ACH.length}</div>
     <div class="achs">${ACH.map(a=>`<div class="ach${S.ach.includes(a[0])?'':' off'}">${STAR}<div><b>${a[1]}</b><small>${a[2]}</small></div></div>`).join('')}</div></div>
   <div class="foot"><span>Прогресс сохраняется на этом телефоне</span><button class="ghost" id="snd">Звук: ${S.sound?'вкл':'выкл'}</button></div>`;
 }
-function goHome(){stopAll(); $('#play').hidden=true; $('#home').hidden=false; renderHome(); scrollTo(0,0)}
+function goHome(){stopAll(); $('#play').hidden=true; $('#journal').hidden=true; clearScene(); $('#home').hidden=false; renderHome(); scrollTo(0,0)}
+
+/* ---------- novelty collector: place x companion x game x find ---------- */
+const PLACES=[['Волшебный лес','🌲','rgba(47,208,114,.38)'],['Белые горы','🏔️','rgba(120,160,255,.38)'],['Хрустальная пещера','💎','rgba(169,139,255,.42)'],['Замок в облаках','🏰','rgba(255,95,162,.36)'],['Морской берег','🌊','rgba(61,219,176,.36)'],['Тёплая пустыня','🏜️','rgba(255,170,60,.36)'],['Вулкан','🌋','rgba(255,90,70,.42)'],['Лунная поляна','🌙','rgba(255,210,63,.32)']].map(a=>({name:a[0],e:a[1],c:a[2]}));
+const COMPS=[['Светлячок','✨'],['Сова','🦉'],['Дракончик','🐉'],['Бабочка','🦋'],['Лисёнок','🦊'],['Кролик','🐇'],['Дельфин','🐬'],['Птенец феникса','🔥']].map(a=>({name:a[0],e:a[1]}));
+const FINDS=[['Лунный кристалл','🔮'],['Древний ключ','🗝️'],['Волшебный свиток','📜'],['Радужный цветок','🌸'],['Звёздная пыль','⭐'],['Сундучок','🎁'],['Тёплый мёд','🍯'],['Золотой жёлудь','🌰']].map(a=>({name:a[0],e:a[1]}));
+const TOTAL=ORDER.length*512;
+const dec=x=>({g:x>>9,p:(x>>6)&7,c:(x>>3)&7,f:x&7});
+const mk=code=>{const d=dec(code);return {...d,code,place:PLACES[d.p],comp:COMPS[d.c],find:FINDS[d.f]}};
+let CUR=null;
+/* chance of a new combination falls steeply as the collection grows: 100% at the start, ~50% at 20, ~26% at 40, ~11% at 80, floor 6% */
+const pNew=n=>Math.max(.06,1/(1+Math.pow(n/20,1.5)));
+function roll(id){
+  const g=ORDER.indexOf(id),seen=new Set(S.disc),mine=S.disc.filter(x=>x>>9===g);
+  const rnd=()=>g*512+r(0,511);
+  let code=-1;
+  if(Math.random()>=pNew(S.disc.length)&&mine.length) code=any(mine);
+  else{for(let i=0;i<300&&code<0;i++){const c=rnd(); if(!seen.has(c)) code=c} if(code<0) code=rnd()}
+  return mk(code);
+}
+function setScene(C){$('#tint').style.setProperty('--pa',C.place.c); $('#tint').style.opacity=1}
+function clearScene(){$('#tint').style.opacity=0}
+function recordFind(){
+  const C=CUR,had=new Set(S.disc),isNew=!had.has(C.code),firsts=[];
+  if(isNew){
+    const u={p:new Set(),c:new Set(),f:new Set()}; S.disc.forEach(x=>{const d=dec(x);u.p.add(d.p);u.c.add(d.c);u.f.add(d.f)});
+    if(!u.p.has(C.p)) firsts.push('Новое место: '+C.place.name);
+    if(!u.c.has(C.c)) firsts.push('Новый спутник: '+C.comp.name);
+    if(!u.f.has(C.f)) firsts.push('Новая находка: '+C.find.name);
+    S.disc.push(C.code);
+  }
+  return {isNew,firsts,C};
+}
+const findHtml=nv=>`<div class="find${nv.isNew?' newf':''}"><span class="fe">${nv.C.find.e}</span><div><b>${nv.C.find.name}</b><small>${nv.C.place.name} · ${nv.C.comp.name}</small></div>${nv.isNew?'<span class="chip hot">Впервые!</span>':''}</div>`;
+function fanfare(){
+  if(!S.sound) return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const t=AC.currentTime;
+    [523,659,784,1047,1319].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain(),st=t+i*.09;o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,st);g.gain.exponentialRampToValueAtTime(.14,st+.02);g.gain.exponentialRampToValueAtTime(.0001,st+.35);o.connect(g).connect(AC.destination);o.start(st);o.stop(st+.4)})}catch(e){}
+}
+function burst(nv){
+  const C=nv.C,o=document.createElement('div'); o.className='nov';
+  o.innerHTML=`<div class="rays"></div><div class="nbox"><div class="ne">${C.find.e}</div><h3>Такое у тебя впервые!</h3><p>${C.place.name} · ${C.comp.name}</p><p>Находка: <b>${C.find.name}</b></p>${nv.firsts.map(f=>`<span class="chip up">${f}</span>`).join('')}<small>нажми, чтобы закрыть</small></div>`;
+  const kill=()=>o.remove(); o.onclick=kill; document.body.append(o); setTimeout(kill,4500);
+  fanfare(); try{navigator.vibrate&&navigator.vibrate([60,40,90])}catch(e){}
+}
+function openJournal(){
+  $('#home').hidden=true; $('#journal').hidden=false; scrollTo(0,0);
+  const d=S.disc,P=new Set(),C=new Set(),F=new Set(); d.forEach(x=>{const k=dec(x);P.add(k.p);C.add(k.c);F.add(k.f)});
+  const row=(arr,set)=>arr.map((a,i)=>set.has(i)?`<div class="jc on"><span>${a.e}</span><b>${a.name}</b></div>`:`<div class="jc"><span>?</span><b>???</b></div>`).join('');
+  const last=d.slice(-8).reverse().map(x=>{const m=mk(x);return `<div class="jl"><span>${m.find.e}</span>${m.find.name}: ${m.place.name}, ${m.comp.name}, ${GAMES[ORDER[m.g]].name}</div>`}).join('');
+  $('#journal').innerHTML=`<div class="phead"><button class="ghost" id="jback">← Назад</button><div class="ptitle">Журнал открытий</div></div>
+  <div class="card"><div class="jnum">${d.length}</div><p class="jnote">комбинаций открыто из ${TOTAL}. Чем больше открыто, тем реже появляются новые, и каждая становится особым моментом.</p></div>
+  <div class="card"><div class="lbl">Места · ${P.size} из ${PLACES.length}</div><div class="jg">${row(PLACES,P)}</div></div>
+  <div class="card"><div class="lbl">Спутники · ${C.size} из ${COMPS.length}</div><div class="jg">${row(COMPS,C)}</div></div>
+  <div class="card"><div class="lbl">Находки · ${F.size} из ${FINDS.length}</div><div class="jg">${row(FINDS,F)}</div></div>
+  <div class="card"><div class="lbl">Последние открытия</div>${last||'<p class="jnote">Пока пусто. Сыграй в любую игру!</p>'}</div>`;
+  $('#jback').onclick=goHome;
+}
 
 /* ---------- game shell ---------- */
 function detail(id,L){
@@ -315,10 +404,11 @@ function detail(id,L){
   return '';
 }
 function intro(id){
-  stopAll(); const G=GAMES[id],L=S.games[id].lvl;
+  stopAll(); const G=GAMES[id],L=S.games[id].lvl; CUR=roll(id);
   $('#home').hidden=true; $('#play').hidden=false; $('#play').style.setProperty('--c',G.c);
   $('#ptitle').textContent=G.name; $('#pscore').textContent=''; $('#tbar').hidden=true;
-  area.innerHTML=`<div class="panel">${mascot('','mid')}<span class="pill">${G.skill} · уровень ${L}</span><h2>${G.name}</h2><p>${G.rules}</p>${detail(id,L)?`<p class="det">${detail(id,L)}</p>`:''}<button class="btn primary wide" id="go">Начать</button></div>`;
+  area.innerHTML=`<div class="panel">${mascot('','mid')}<span class="pill">${G.skill} · уровень ${L}</span><h2>${G.name}</h2><p class="scene">${CUR.place.e} ${CUR.place.name} · с тобой ${CUR.comp.name} ${CUR.comp.e}</p><p>${G.rules}</p>${detail(id,L)?`<p class="det">${detail(id,L)}</p>`:''}<button class="btn primary wide" id="go">Начать</button></div>`;
+  setScene(CUR); $('#ptitle').textContent=G.name+' '+CUR.comp.e;
   $('#go').onclick=()=>START[id]();
   scrollTo(0,0);
 }
@@ -335,6 +425,7 @@ function finish(id,score,newLvl,big,sub){
   if(!S.today.done.includes(id)) S.today.done.push(id);
   let xp=10+G.xp(score)+3*newLvl+(newLvl>old?15:0),daily=false;
   if(S.today.done.length===ORDER.length&&!S.today.bonus){S.today.bonus=true;S.fullDays++;xp+=50;daily=true}
+  const nv=recordFind(); if(nv.isNew) xp+=10+10*nv.firsts.length;
   const pl0=plevel(S.xp); S.xp+=xp; const pl1=plevel(S.xp);
   const fresh=ACH.filter(a=>!S.ach.includes(a[0])&&a[3](S)); fresh.forEach(a=>S.ach.push(a[0]));
   save();
@@ -342,7 +433,7 @@ function finish(id,score,newLvl,big,sub){
   const nxt=ORDER.find(k=>!S.today.done.includes(k));
   $('#pscore').textContent='';
   area.innerHTML=`<div class="panel">${mascot(down?'':'happy','mid')}
-    <div class="big">${big}</div><p>${sub}</p>
+    <div class="big">${big}</div><p>${sub}</p>${findHtml(nv)}
     <div class="chips"><span class="chip hot">+${xp} XP</span><span class="chip${up?' up':''}">${up||down?`Уровень ${old} → ${newLvl}`:`Уровень ${newLvl}`}</span>${rec?'<span class="chip hot">Новый рекорд</span>':''}</div>
     ${pl1>pl0?`<div class="news">${STAR}Уровень игрока ${pl1}: ${title(pl1)}</div>`:''}
     ${daily?`<div class="news">${STAR}Тренировка дня пройдена: +50 XP</div>`:''}
@@ -350,6 +441,7 @@ function finish(id,score,newLvl,big,sub){
     <p class="say">${capped?'Отличный результат! Сегодня уровень уже вырос, следующая ступень откроется завтра.':any(up?PRAISE:down?SOFT:STEADY)}</p>
     <div class="acts"><button class="btn" id="again">Ещё раз</button>${nxt?`<button class="btn primary" data-play="${nxt}">Дальше: ${GAMES[nxt].name}</button>`:'<button class="btn primary" id="tohome">На главную</button>'}</div></div>`;
   $('#again').onclick=()=>intro(id);
+  if(nv.isNew) burst(nv);
   const th=$('#tohome'); if(th) th.onclick=goHome;
 }
 
@@ -506,6 +598,7 @@ const START={
 };
 
 document.addEventListener('click',e=>{
+  if(e.target.closest('[data-journal]')) return openJournal();
   const p=e.target.closest('[data-play]'); if(p) return intro(p.dataset.play);
   if(e.target.closest('#snd')){S.sound=!S.sound; save(); renderHome()}
 });
