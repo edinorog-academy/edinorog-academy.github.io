@@ -1,5 +1,5 @@
 // Offline support: the page itself is network-first (so updates arrive), everything else cache-first.
-const CACHE = 'unicorn-v6';
+const CACHE = 'unicorn-v7';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png', './icon-maskable-512.png', './unicorn.webp', './unicorn-head.webp'];
 
 self.addEventListener('install', e => {
@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(res => keep(req, res)).catch(() => caches.match(req).then(r => r || caches.match('./index.html'))));
+    e.respondWith(fetch(req, { cache: 'no-store' }).then(res => keep(req, res)).catch(() => caches.match(req).then(r => r || caches.match('./index.html'))));
     return;
   }
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => keep(req, res))));

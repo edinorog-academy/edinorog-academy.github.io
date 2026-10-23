@@ -348,7 +348,7 @@ function renderHome(){
   <button class="gcard" data-journal="1" style="--c:var(--lilac)"><span class="gicon"><svg viewBox="0 0 28 28"><path d="M3 5h10v18H3zM15 5h10v18H15z"/></svg></span><span class="gtxt"><span class="gname">Журнал открытий</span><span class="gmeta">${S.disc.length} из ${TOTAL} комбинаций</span></span><span class="gplay">Открыть</span></button>
   <div class="card"><div class="lbl">Достижения · ${S.ach.length} из ${ACH.length}</div>
     <div class="achs">${ACH.map(a=>`<div class="ach${S.ach.includes(a[0])?'':' off'}">${STAR}<div><b>${a[1]}</b><small>${a[2]}</small></div></div>`).join('')}</div></div>
-  <div class="foot"><span>Прогресс сохраняется на этом телефоне</span><button class="ghost" id="snd">Звук: ${S.sound?'вкл':'выкл'}</button></div>`;
+  <div class="foot"><span>Прогресс сохраняется на этом телефоне · версия 7</span><button class="ghost" id="snd">Звук: ${S.sound?'вкл':'выкл'}</button></div>`;
 }
 function goHome(){stopAll(); $('#play').hidden=true; $('#journal').hidden=true; clearScene(); $('#home').hidden=false; renderHome(); scrollTo(0,0)}
 
