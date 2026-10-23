@@ -178,6 +178,14 @@ h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-wei
 .evt span{font-size:30px;line-height:1}
 .evt b{display:block}
 .evt small{display:block;font-weight:700;font-size:13px}
+.opts.one{grid-template-columns:1fr}
+.opt.txt{font-family:var(--body);font-size:16px;text-align:left;padding:14px 16px;line-height:1.3}
+.opt.good{background:var(--mint);color:var(--deep)}
+.opt.bad{background:var(--bad);color:var(--deep)}
+.cap{display:block;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:6px;font-family:var(--body)}
+.sw[data-c]{box-shadow:inset 0 0 0 2px rgba(255,246,236,.55)}
+.draw{background:var(--ink);border-radius:20px;overflow:hidden;width:100%;max-width:340px;margin:0 auto;aspect-ratio:1}
+.draw canvas{display:block;width:100%;height:100%;touch-action:none}
 @keyframes fadein{from{opacity:0}}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes pop2{from{transform:scale(.4);opacity:0}}
@@ -225,8 +233,8 @@ const GAMES={
     rules:'Решай примеры в уме и выбирай верный ответ. Ошибки снижают точность. 45 секунд.'},
   log:{name:'Продолжи ряд',skill:'Логика',c:'var(--lilac)',max:7,xp:s=>s*2,
     rules:'Найди закономерность в ряду чисел и выбери, какое число будет следующим. 60 секунд.'},
-  cre:{name:'Фабрика идей',skill:'Креативность',c:'var(--sky)',max:8,xp:s=>s*2,
-    rules:'Три раунда по 40 секунд: придумай, как ещё можно использовать предмет, чем похожи разные вещи и что будет в странной ситуации. Пиши коротко, в 2–3 слова, и жми «+». Считается каждая новая идея, но самые ценные — неожиданные.'}
+  cre:{name:'Мастерская идей',skill:'Креативность',c:'var(--sky)',max:8,xp:s=>s*2,
+    rules:'Три коротких задания. Сначала найди слово, которое подходит сразу к трём. Потом выбери самое неожиданное применение предмета. В конце преврати закорючку в рисунок и придумай ему название. Здесь смелая идея ценнее правильной.'}
 };
 const ATT=[[3,1],[4,1],[4,-1],[5,1],[5,-1],[6,1],[6,-1]];
 const memK=L=>L+2, memN=k=>k<=4?3:k<=7?4:k<=11?5:6;
@@ -242,11 +250,11 @@ const ACH=[
   ['lv5','Пятёрка','5 уровень в любой игре',s=>ORDER.some(k=>s.games[k].lvl>=5)],
   ['harm','Гармония','3 уровень во всех играх',s=>ORDER.every(k=>s.games[k].lvl>=3)],
   ['xp1k','Тысяча искр','Набрать 1000 XP',s=>s.xp>=1000],
-  ['idea','Фонтан идей','Придумать 20 идей за одну игру',s=>s.games.cre.best>=20],
+  ['idea','Творец','Набрать 11 из 11 в Мастерской идей',s=>s.games.cre.best>=11],
   ['col10','Коллекционер','Открыть 10 комбинаций',s=>s.disc.length>=10],
   ['col50','Исследователь','Открыть 50 комбинаций',s=>s.disc.length>=50]
 ];
-const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.','В каждой тренировке новое место и новый спутник. Собирай комбинации в журнале открытий.','Иногда во время тренировки случается неожиданное событие. Никогда не знаешь, когда.'];
+const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Мастерской идей» смелее: необычная идея ценнее, чем правильная.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.','В каждой тренировке новое место и новый спутник. Собирай комбинации в журнале открытий.','Иногда во время тренировки случается неожиданное событие. Никогда не знаешь, когда.'];
 const PRAISE=['Вот это скорость мысли!','Мозг сказал спасибо. Сделаю чуть сложнее.','Ты в ударе! Уровень выше.'];
 const STEADY=['Хороший результат. Ещё немного, и уровень поднимется.','Стабильно! Это и есть тренировка.','Неплохо! Попробуешь побить рекорд?'];
 const SOFT=['Я сделал чуть проще. Тренировка работает на краю твоих сил.','Ничего страшного: сложность подстроилась под тебя.'];
@@ -265,16 +273,17 @@ const mascot=(mood,size)=>`<img class="fox ${size} ${mood}" src="${size==='big'?
 
 /* ---------- state: saved on this phone ---------- */
 const KEY='lisorog-v1';
-const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],disc:[],sinceEvt:2,evCount:0,updatedAt:0,
+const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],disc:[],sinceEvt:2,evCount:0,art:[],updatedAt:0,
   games:Object.fromEntries(ORDER.map(k=>[k,{lvl:1,best:0,plays:0}]))});
 function norm(x){
   const d=DEF(); if(!x||typeof x!=='object') return d;
   const o={...d,...x,today:{...d.today,...(x.today||{})},games:{}};
-  o.today.done=[...(o.today.done||[])]; o.ach=[...(x.ach||[])]; o.disc=[...(x.disc||[])];
+  o.today.done=[...(o.today.done||[])]; o.ach=[...(x.ach||[])]; o.disc=[...(x.disc||[])]; o.art=[...(x.art||[])];
   for(const k of ORDER) o.games[k]={...d.games[k],...((x.games||{})[k]||{})};
   return o;
 }
 let S; try{S=norm(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=DEF()}
+if(!S.creV2){S.games.cre.best=0;S.creV2=true}
 if(!S.paced){const cap=Math.max(1,S.streak||0); for(const k of ORDER) S.games[k].lvl=Math.min(S.games[k].lvl,cap); S.paced=true; try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function save(){S.updatedAt=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const dkey=(off=0)=>{const d=new Date();d.setDate(d.getDate()+off);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -407,6 +416,7 @@ function openJournal(){
   <div class="card"><div class="lbl">Места · ${P.size} из ${PLACES.length}</div><div class="jg">${row(PLACES,P)}</div></div>
   <div class="card"><div class="lbl">Спутники · ${C.size} из ${COMPS.length}</div><div class="jg">${row(COMPS,C)}</div></div>
   <div class="card"><div class="lbl">Находки · ${F.size} из ${FINDS.length}</div><div class="jg">${row(FINDS,F)}</div></div>
+  ${S.art.length?`<div class="card"><div class="lbl">Мои рисунки · ${S.art.length}</div><div class="jg">${S.art.map(a=>`<div class="jc on"><img src="${a.img}" alt="" style="width:100%;border-radius:8px"><b>${esc(a.name)}</b></div>`).join('')}</div></div>`:''}
   <div class="card"><div class="lbl">Последние открытия</div>${last||'<p class="jnote">Пока пусто. Сыграй в любую игру!</p>'}</div>`;
   $('#jback').onclick=goHome;
 }
@@ -415,7 +425,7 @@ function openJournal(){
 function detail(id,L){
   if(id==='mem'){const k=memK(L),n=memN(k);return `На этом уровне: ${k} клеток на поле ${n}×${n}.`}
   if(id==='att'){const[n,d]=ATT[L-1];return `На этом уровне: таблица ${n}×${n}, ${d>0?'от 1 до '+n*n:'от '+n*n+' до 1'}.`}
-  if(id==='cre'){const t=6+2*L;return `Цель уровня: ${t} ${plural(t,'идея','идеи','идей')} за 3 раунда. Темы: ${['простые','посложнее','абстрактные'][L<=3?0:L<=6?1:2]}.`}
+  if(id==='cre'){return `На этом уровне слова и предметы: ${['простые','посложнее','абстрактные'][L<=3?0:L<=6?1:2]}. Заданий: 5 + 3 + рисунок.`}
   return '';
 }
 function intro(id){
@@ -577,35 +587,103 @@ function genLog(L){
   return {seq,ans,opts:options(ans,Math.abs(seq[seq.length-1]-seq[seq.length-2])||5)};
 }
 
-/* ---------- creativity: idea factory (fluency; harder topics and higher targets by level) ---------- */
-const IDEAS=[
-  {q:t=>`Как ещё можно использовать <b>${t}</b>?`,t:[['газету','кирпич','ложку','носок','скрепку','пустую бутылку'],['старый зонт','воздушный шарик','ведро','пустую коробку','расчёску','прищепку'],['тень','эхо','лужу','лишнюю минуту','пустую страницу','забытую мелодию']]},
-  {q:t=>`Чем похожи <b>${t}</b>?`,t:[['яблоко и мяч','кошка и часы','книга и дверь','чайник и вулкан','луна и тарелка'],['облако и подушка','река и дорога','зеркало и озеро','дерево и семья','телефон и окно'],['музыка и лестница','память и сад','время и река','улыбка и солнце','вопрос и ключ']]},
-  {q:t=>`Что будет, если <b>${t}</b>?`,t:[['у людей вырастет хвост','пойдёт дождь из лимонада','собаки научатся говорить','все машины станут розовыми','зима продлится год'],['исчезнет всё электричество','люди перестанут спать','вода станет сладкой','деньги будут расти на деревьях','все начнут говорить только правду'],['время пойдёт назад','у всех вещей пропадут цвета','люди начнут читать мысли','исчезнут все числа','каждый день будет повторяться']]}
+/* ---------- creative workshop: word links, unusual uses, a drawing ---------- */
+const RAT=[
+ [[['свет','ночь','дорожка'],'лунный',['горячий','деревянный','быстрый']],
+  [['волна','ветер','берег'],'морской',['бумажный','квадратный','сладкий']],
+  [['ком','человек','барс'],'снежный',['тёплый','весёлый','железный']],
+  [['рыбка','ключик','век'],'золотой',['стеклянный','мокрый','тихий']],
+  [['ящик','список','кот'],'чёрный',['прозрачный','сладкий','громкий']],
+  [['клуб','сторож','полёт'],'ночной',['морозный','квадратный','сладкий']],
+  [['чай','свет','лук'],'зелёный',['кислый','высокий','громкий']],
+  [['шоколад','источник','привет'],'горячий',['железный','высокий','пушистый']]],
+ [[['скрипичный','гаечный','дверной'],'ключ',['замок','рычаг','молоток']],
+  [['зелёный','репчатый','боевой'],'лук',['чеснок','стрела','перец']],
+  [['песчаная','девичья','садовая'],'коса',['лента','пляж','ножницы']],
+  [['компьютерная','летучая','полевая'],'мышь',['кошка','птица','клавиатура']],
+  [['шариковая','дверная','детская'],'ручка',['нога','кисть','перо']],
+  [['русский','острый','змеиный'],'язык',['слово','зуб','голос']]],
+ [[['пиковый','звёздный','золотой'],'час',['миг','цвет','шаг']],
+  [['Млечный','жизненный','тернистый'],'путь',['дом','шаг','мост']],
+  [['квадратный','зубной','имбирный'],'корень',['стебель','лист','ствол']],
+  [['птичье','самолётное','автомобильное'],'крыло',['колесо','хвост','окно']],
+  [['стола','гриба','циркуля'],'ножка',['шляпка','вилка','стул']],
+  [['швейная','ёлочная','медицинская'],'игла',['нитка','шишка','ложка']]]
 ];
-const esc=v=>v.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const USE=[
+ [['газету',['Читать новости','Подстелить под краску','Завернуть подарок'],'Скрутить в трубу и стать капитаном корабля'],
+  ['кирпич',['Построить стену','Сделать дорожку','Подпереть дверь'],'Нагреть у печки и положить в постель вместо грелки'],
+  ['ложку',['Есть суп','Помешать чай','Достать варенье'],'Повесить на верёвку как колокольчик на ветру'],
+  ['пустую бутылку',['Сдать в приёмку','Налить воды','Поставить цветы'],'Запечатать с запиской и пустить по реке']],
+ [['зонт',['Спрятаться от дождя','Закрыться от солнца','Подарить другу'],'Перевернуть и ловить в него падающие яблоки'],
+  ['ведро',['Набрать воды','Помыть пол','Собрать грибы'],'Надеть на голову и стать рыцарем'],
+  ['прищепку',['Повесить бельё','Закрыть пакет','Скрепить бумаги'],'Сделать из неё клешню игрушечного краба'],
+  ['расчёску',['Причесаться','Расчесать кота','Убрать пыль'],'Сыграть на ней мелодию через листок бумаги']],
+ [['лужу',['Перепрыгнуть','Обойти','Вымыть сапоги'],'Смотреть в неё как в зеркало и найти второе небо'],
+  ['тень',['Спрятаться от жары','Узнать время по солнцу','Нарисовать на стене'],'Считать её другом и написать ему письмо'],
+  ['эхо',['Крикнуть в горах','Проверить акустику','Повторить слово'],'Шепнуть ему секрет и дождаться, когда он вернётся'],
+  ['паузу',['Передохнуть','Подумать','Выпить чаю'],'Положить в карман на чёрный день и достать, когда нужно']]
+];
+const esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function squiggle(cx){
+  const k=r(0,4),rot=Math.random()*6.28,ox=r(-20,20),oy=r(-20,20),pts=[];
+  for(let i=0;i<=60;i++){const t=i/60;let x,y;
+    if(k===0){x=-110+220*t;y=45*Math.sin(t*9)}
+    else if(k===1){x=-100+200*t;y=(i%2?-45:45)*(.4+.6*Math.random())}
+    else if(k===2){const a=t*14,q=8+t*95;x=q*Math.cos(a);y=q*Math.sin(a)}
+    else if(k===3){const a=t*6.28,q=70+18*Math.sin(a*3+1);x=q*Math.cos(a);y=q*Math.sin(a)}
+    else{const a=3.14*t;x=95*Math.cos(a);y=-85*Math.sin(a)+30}
+    pts.push([160+ox+x*Math.cos(rot)-y*Math.sin(rot),160+oy+x*Math.sin(rot)+y*Math.cos(rot)]);
+  }
+  cx.strokeStyle='#B79CFF';cx.lineWidth=9;cx.lineCap='round';cx.lineJoin='round';cx.beginPath();
+  pts.forEach((p,i)=>i?cx.lineTo(p[0],p[1]):cx.moveTo(p[0],p[1]));cx.stroke();
+}
 function playCre(){
-  const L=S.games.cre.lvl,tier=L<=3?0:L<=6?1:2,DUR=40+(windy()?10:0),target=6+2*L; let round=0,total=0;
-  $('#pscore').textContent='0';
-  (function next(){
-    if(round>=IDEAS.length) return finish('cre',total,L+(total>=target?1:total<target/2?-1:0),String(total),`${plural(total,'идея','идеи','идей')} · цель уровня ${target}`);
-    const P=IDEAS[round++],seen=new Set(),t0=performance.now();
-    area.innerHTML=`<p class="hint">Раунд ${round} из ${IDEAS.length}</p><div class="qbox cre">${P.q(any(P.t[tier]))}</div>
-      <form class="idea" id="iform"><input id="iin" autocomplete="off" maxlength="60" placeholder="Твоя идея…" aria-label="Идея"><button class="btn primary" aria-label="Добавить идею">+</button></form><div class="ilist" id="ilist"></div>`;
-    const inp=$('#iin'); inp.focus(); $('#tbar').hidden=false;
-    $('#iform').onsubmit=e=>{
-      e.preventDefault(); const v=inp.value.trim().toLowerCase().replace(/\s+/g,' '); inp.value=''; inp.focus();
-      if(v.length<3||seen.has(v)) return fx(false);
-      seen.add(v); total++; fx(true); $('#pscore').textContent=total;
-      $('#ilist').insertAdjacentHTML('afterbegin',`<span>${esc(v)}</span>`);
+  const L=S.games.cre.lvl,t=L<=3?0:L<=6?1:2;
+  const rats=shuffle([...RAT[t]]).slice(0,5),uses=shuffle([...USE[t]]).slice(0,3);
+  const steps=[...rats.map(x=>({k:'rat',x})),...uses.map(x=>({k:'use',x})),{k:'draw'}];
+  let i=0,score=0,nr=0,nu=0,drew=false;
+  const head=()=>{$('#pscore').textContent=score};
+  head();
+  function choose(prompt,opts,ans,done){
+    area.innerHTML=`<p class="hint">Задание ${i} из ${steps.length}</p>${prompt}<div class="opts one">${opts.map((o,j)=>`<button class="opt txt" data-j="${j}">${o}</button>`).join('')}</div>`;
+    area.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const ok=+b.dataset.j===ans; area.querySelectorAll('.opt').forEach(x=>{x.disabled=true; if(+x.dataset.j===ans) x.classList.add('good')});
+      if(!ok) b.classList.add('bad'); fx(ok); if(ok){score++;done()} head(); later(next,ok?800:1500);
+    });
+  }
+  function draw(){
+    const DR=30+(windy()?10:0),cols=['#2A1B3D','#FF5FA2','#3DDBB0','#FF7A1A','#5CC8FF'];
+    area.innerHTML=`<p class="hint">Преврати закорючку во <b>что угодно</b></p><div class="draw"><canvas id="cv" width="320" height="320"></canvas></div><div class="sws" style="--k:5">${cols.map((c,j)=>`<button class="sw" data-c="${c}" style="background:${c};aspect-ratio:1.2" aria-label="Цвет ${j+1}"></button>`).join('')}</div><div class="acts"><button class="btn" id="clr">Стереть</button><button class="btn primary" id="dn">Готово</button></div>`;
+    const cv=$('#cv'),cx=cv.getContext('2d'); let color=cols[0],pts=0,down=false,lx=0,ly=0,t0=performance.now(),ended=false;
+    const paint=()=>{cx.fillStyle='#FFF6EC';cx.fillRect(0,0,320,320);squiggle(cx)}; paint();
+    const pos=e=>{const q=cv.getBoundingClientRect();return [(e.clientX-q.left)*320/q.width,(e.clientY-q.top)*320/q.height]};
+    cv.onpointerdown=e=>{down=true;try{cv.setPointerCapture(e.pointerId)}catch(_){} [lx,ly]=pos(e)};
+    cv.onpointermove=e=>{if(!down) return; const [x,y]=pos(e); cx.strokeStyle=color;cx.lineWidth=6;cx.lineCap='round';cx.beginPath();cx.moveTo(lx,ly);cx.lineTo(x,y);cx.stroke();lx=x;ly=y;pts++};
+    cv.onpointerup=cv.onpointercancel=()=>{down=false};
+    area.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{color=b.dataset.c});
+    $('#clr').onclick=()=>{paint();pts=0};
+    const end=()=>{
+      if(ended) return; ended=true; stopAll(); $('#tbar').hidden=true;
+      drew=pts>=60; score+=drew?3:1; head();
+      const tmp=document.createElement('canvas'); tmp.width=tmp.height=160; tmp.getContext('2d').drawImage(cv,0,0,160,160);
+      const img=tmp.toDataURL('image/webp',.6);
+      area.innerHTML=`<div class="panel"><img src="${img}" alt="" width="160" height="160" style="border-radius:16px"><h2>Как назовёшь рисунок?</h2><form class="idea" id="nf"><input id="nm" maxlength="28" placeholder="Название…" autocomplete="off"><button class="btn primary">OK</button></form></div>`;
+      $('#nf').onsubmit=e=>{e.preventDefault(); S.art.unshift({img,name:$('#nm').value.trim()||'Без названия'}); S.art=S.art.slice(0,12); next()};
     };
-    (function step(){
-      const left=DUR-(performance.now()-t0)/1000;
-      $('#tfill').style.transform=`scaleX(${Math.max(0,left/DUR)})`;
-      if(left<=0){inp.blur(); return next()}
-      raf=requestAnimationFrame(step);
-    })();
-  })();
+    $('#dn').onclick=end; $('#tbar').hidden=false;
+    (function tick(){const left=DR-(performance.now()-t0)/1000; $('#tfill').style.transform=`scaleX(${Math.max(0,left/DR)})`; if(left<=0) return end(); raf=requestAnimationFrame(tick)})();
+  }
+  function next(){
+    if(i>=steps.length) return finish('cre',score,L+(score>=9?1:score<=4?-1:0),String(score),`${nr} из ${rats.length} связей · ${nu} из ${uses.length} оригинальных идей · ${drew?'рисунок готов':'рисунок почти пустой'}`);
+    const st=steps[i++]; $('#tbar').hidden=true;
+    if(st.k==='draw') return draw();
+    if(st.k==='rat'){const [w,a,d]=st.x,o=shuffle([a,...d]);
+      return choose(`<div class="qbox cre"><span class="cap">Подбери слово, которое подходит ко всем трём</span>${w.map(v=>`<b>${v}</b>`).join(' · ')}</div>`,o,o.indexOf(a),()=>nr++)}
+    const [ob,ord,un]=st.x,o=shuffle([un,...ord]);
+    choose(`<div class="qbox cre"><span class="cap">Какое применение самое неожиданное?</span>Что можно сделать с <b>${ob}</b>?</div>`,o,o.indexOf(un),()=>nu++);
+  }
+  next();
 }
 
 const START={
