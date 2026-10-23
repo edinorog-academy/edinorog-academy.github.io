@@ -174,6 +174,10 @@ h2{font-family:var(--display);margin:0;text-wrap:balance;font-size:22px;font-wei
 .nbox p{margin:0;font-weight:700}
 .nbox small{color:var(--muted);font-weight:700;font-size:12px;margin-top:4px}
 .ne{font-size:64px;line-height:1;animation:float 2s ease-in-out infinite}
+.evt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:linear-gradient(90deg,var(--horn),var(--lilac));color:var(--deep);border-radius:16px;padding:10px 14px;animation:pop2 .5s cubic-bezier(.2,1.5,.4,1)}
+.evt span{font-size:30px;line-height:1}
+.evt b{display:block}
+.evt small{display:block;font-weight:700;font-size:13px}
 @keyframes fadein{from{opacity:0}}
 @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 @keyframes pop2{from{transform:scale(.4);opacity:0}}
@@ -242,7 +246,7 @@ const ACH=[
   ['col10','Коллекционер','Открыть 10 комбинаций',s=>s.disc.length>=10],
   ['col50','Исследователь','Открыть 50 комбинаций',s=>s.disc.length>=50]
 ];
-const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.','В каждой тренировке новое место и новый спутник. Собирай комбинации в журнале открытий.'];
+const TIPS=['Лучше 10–15 минут каждый день, чем час раз в неделю.','Сон закрепляет то, что ты натренировал днём.','Прогулка или зарядка перед игрой разгоняют внимание.','Уровень снизился? Это нормально: сложность держится на краю твоих сил, там мозг и растёт.','В таблице Шульте смотри в центр и лови числа боковым зрением.','В «Цветовом обмане» не читай слово, смотри только на цвет букв.','В «Фабрике идей» нет неправильных ответов: чем неожиданнее идея, тем лучше.','Уровень в каждой игре растёт не больше чем на одну ступень в день: так мозг успевает привыкнуть.','В каждой тренировке новое место и новый спутник. Собирай комбинации в журнале открытий.','Иногда во время тренировки случается неожиданное событие. Никогда не знаешь, когда.'];
 const PRAISE=['Вот это скорость мысли!','Мозг сказал спасибо. Сделаю чуть сложнее.','Ты в ударе! Уровень выше.'];
 const STEADY=['Хороший результат. Ещё немного, и уровень поднимется.','Стабильно! Это и есть тренировка.','Неплохо! Попробуешь побить рекорд?'];
 const SOFT=['Я сделал чуть проще. Тренировка работает на краю твоих сил.','Ничего страшного: сложность подстроилась под тебя.'];
@@ -261,7 +265,7 @@ const mascot=(mood,size)=>`<img class="fox ${size} ${mood}" src="${size==='big'?
 
 /* ---------- state: saved on this phone ---------- */
 const KEY='lisorog-v1';
-const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],disc:[],updatedAt:0,
+const DEF=()=>({v:1,xp:0,plays:0,streak:0,bestStreak:0,lastDay:'',fullDays:0,today:{date:'',done:[],bonus:false},sound:true,ach:[],disc:[],sinceEvt:2,evCount:0,updatedAt:0,
   games:Object.fromEntries(ORDER.map(k=>[k,{lvl:1,best:0,plays:0}]))});
 function norm(x){
   const d=DEF(); if(!x||typeof x!=='object') return d;
@@ -346,7 +350,18 @@ const FINDS=[['Лунный кристалл','🔮'],['Древний ключ'
 const TOTAL=ORDER.length*512;
 const dec=x=>({g:x>>9,p:(x>>6)&7,c:(x>>3)&7,f:x&7});
 const mk=code=>{const d=dec(code);return {...d,code,place:PLACES[d.p],comp:COMPS[d.c],find:FINDS[d.f]}};
-let CUR=null;
+let CUR=null,EVT=null;
+/* surprise events: never twice in a row, only after at least 2 plain sessions, about 30% after that */
+const EVENTS={rainbow:{e:'🌈',name:'Радуга',text:()=>'Весь опыт за эту игру удвоен.'},
+  wind:{e:'🍃',name:'Попутный ветер',text:id=>id==='mem'?'Клетки светятся чуть дольше.':'В этой игре на 10 секунд больше времени.'},
+  gift:{e:'🎁',name:'Гость с подарком',text:()=>'К опыту за эту игру добавим 25 сверху.'}};
+function rollEvent(id){
+  EVT=null; if(S.sinceEvt<2||Math.random()>=.3) return;
+  const ks=['rainbow','gift']; if(id!=='att') ks.push('wind');
+  const k=any(ks); EVT={k,...EVENTS[k]};
+}
+const evtHtml=id=>`<div class="evt"><span>${EVT.e}</span><div><b>${EVT.name}!</b><small>${EVT.text(id)}</small></div></div>`;
+const windy=()=>EVT&&EVT.k==='wind';
 /* chance of a new combination falls steeply as the collection grows: 100% at the start, ~50% at 20, ~26% at 40, ~11% at 80, floor 6% */
 const pNew=n=>Math.max(.06,1/(1+Math.pow(n/20,1.5)));
 function roll(id){
@@ -388,7 +403,7 @@ function openJournal(){
   const row=(arr,set)=>arr.map((a,i)=>set.has(i)?`<div class="jc on"><span>${a.e}</span><b>${a.name}</b></div>`:`<div class="jc"><span>?</span><b>???</b></div>`).join('');
   const last=d.slice(-8).reverse().map(x=>{const m=mk(x);return `<div class="jl"><span>${m.find.e}</span>${m.find.name}: ${m.place.name}, ${m.comp.name}, ${GAMES[ORDER[m.g]].name}</div>`}).join('');
   $('#journal').innerHTML=`<div class="phead"><button class="ghost" id="jback">← Назад</button><div class="ptitle">Журнал открытий</div></div>
-  <div class="card"><div class="jnum">${d.length}</div><p class="jnote">комбинаций открыто из ${TOTAL}. Чем больше открыто, тем реже появляются новые, и каждая становится особым моментом.</p></div>
+  <div class="card"><div class="jnum">${d.length}</div><p class="jnote">комбинаций открыто из ${TOTAL}. Чем больше открыто, тем реже появляются новые, и каждая становится особым моментом. Неожиданных событий было: ${S.evCount}.</p></div>
   <div class="card"><div class="lbl">Места · ${P.size} из ${PLACES.length}</div><div class="jg">${row(PLACES,P)}</div></div>
   <div class="card"><div class="lbl">Спутники · ${C.size} из ${COMPS.length}</div><div class="jg">${row(COMPS,C)}</div></div>
   <div class="card"><div class="lbl">Находки · ${F.size} из ${FINDS.length}</div><div class="jg">${row(FINDS,F)}</div></div>
@@ -404,10 +419,11 @@ function detail(id,L){
   return '';
 }
 function intro(id){
-  stopAll(); const G=GAMES[id],L=S.games[id].lvl; CUR=roll(id);
+  stopAll(); const G=GAMES[id],L=S.games[id].lvl; CUR=roll(id); rollEvent(id);
   $('#home').hidden=true; $('#play').hidden=false; $('#play').style.setProperty('--c',G.c);
   $('#ptitle').textContent=G.name; $('#pscore').textContent=''; $('#tbar').hidden=true;
-  area.innerHTML=`<div class="panel">${mascot('','mid')}<span class="pill">${G.skill} · уровень ${L}</span><h2>${G.name}</h2><p class="scene">${CUR.place.e} ${CUR.place.name} · с тобой ${CUR.comp.name} ${CUR.comp.e}</p><p>${G.rules}</p>${detail(id,L)?`<p class="det">${detail(id,L)}</p>`:''}<button class="btn primary wide" id="go">Начать</button></div>`;
+  area.innerHTML=`<div class="panel">${mascot('','mid')}${EVT?evtHtml(id):''}<span class="pill">${G.skill} · уровень ${L}</span><h2>${G.name}</h2><p class="scene">${CUR.place.e} ${CUR.place.name} · с тобой ${CUR.comp.name} ${CUR.comp.e}</p><p>${G.rules}</p>${detail(id,L)?`<p class="det">${detail(id,L)}</p>`:''}<button class="btn primary wide" id="go">Начать</button></div>`;
+  if(EVT){beep(true); try{navigator.vibrate&&navigator.vibrate(50)}catch(e){}}
   setScene(CUR); $('#ptitle').textContent=G.name+' '+CUR.comp.e;
   $('#go').onclick=()=>START[id]();
   scrollTo(0,0);
@@ -426,6 +442,7 @@ function finish(id,score,newLvl,big,sub){
   let xp=10+G.xp(score)+3*newLvl+(newLvl>old?15:0),daily=false;
   if(S.today.done.length===ORDER.length&&!S.today.bonus){S.today.bonus=true;S.fullDays++;xp+=50;daily=true}
   const nv=recordFind(); if(nv.isNew) xp+=10+10*nv.firsts.length;
+  if(EVT){ if(EVT.k==='rainbow') xp*=2; else if(EVT.k==='gift') xp+=25; S.evCount++; S.sinceEvt=0 } else S.sinceEvt++;
   const pl0=plevel(S.xp); S.xp+=xp; const pl1=plevel(S.xp);
   const fresh=ACH.filter(a=>!S.ach.includes(a[0])&&a[3](S)); fresh.forEach(a=>S.ach.push(a[0]));
   save();
@@ -434,7 +451,7 @@ function finish(id,score,newLvl,big,sub){
   $('#pscore').textContent='';
   area.innerHTML=`<div class="panel">${mascot(down?'':'happy','mid')}
     <div class="big">${big}</div><p>${sub}</p>${findHtml(nv)}
-    <div class="chips"><span class="chip hot">+${xp} XP</span><span class="chip${up?' up':''}">${up||down?`Уровень ${old} → ${newLvl}`:`Уровень ${newLvl}`}</span>${rec?'<span class="chip hot">Новый рекорд</span>':''}</div>
+    <div class="chips"><span class="chip hot">+${xp} XP</span>${EVT?`<span class="chip up">${EVT.e} ${EVT.name}</span>`:''}<span class="chip${up?' up':''}">${up||down?`Уровень ${old} → ${newLvl}`:`Уровень ${newLvl}`}</span>${rec?'<span class="chip hot">Новый рекорд</span>':''}</div>
     ${pl1>pl0?`<div class="news">${STAR}Уровень игрока ${pl1}: ${title(pl1)}</div>`:''}
     ${daily?`<div class="news">${STAR}Тренировка дня пройдена: +50 XP</div>`:''}
     ${fresh.map(a=>`<div class="news">${STAR}Достижение «${a[1]}»</div>`).join('')}
@@ -469,7 +486,7 @@ function playMem(){
           later(trial,1300);
         }
       });
-    },1000+k*350);
+    },1000+k*350+(windy()?1200:0));
   })();
 }
 
@@ -492,6 +509,7 @@ function playAtt(){
 
 /* ---------- timed blitz: speed, math, logic ---------- */
 function blitz(id,dur,gen,draw,judge){
+  if(windy()) dur+=10;
   const L=S.games[id].lvl,t0=performance.now(),fill=$('#tfill'); let ok=0,bad=0,it;
   $('#tbar').hidden=false; $('#pscore').textContent='0';
   const pick=v=>{if(!it) return; const good=v===it.ans; good?ok++:bad++; fx(good); $('#pscore').textContent=ok; it=gen(L); draw(it,pick)};
@@ -567,7 +585,7 @@ const IDEAS=[
 ];
 const esc=v=>v.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function playCre(){
-  const L=S.games.cre.lvl,tier=L<=3?0:L<=6?1:2,DUR=40,target=6+2*L; let round=0,total=0;
+  const L=S.games.cre.lvl,tier=L<=3?0:L<=6?1:2,DUR=40+(windy()?10:0),target=6+2*L; let round=0,total=0;
   $('#pscore').textContent='0';
   (function next(){
     if(round>=IDEAS.length) return finish('cre',total,L+(total>=target?1:total<target/2?-1:0),String(total),`${plural(total,'идея','идеи','идей')} · цель уровня ${target}`);
